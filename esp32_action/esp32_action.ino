@@ -1,32 +1,31 @@
-const int relayPin = 4;
-
-// Your relay was behaving as active LOW earlier:
-const int RELAY_ON = LOW;
-const int RELAY_OFF = HIGH;
+const int relayPin = 6;
+const unsigned long baudRate = 230400;
 
 void setup() {
   pinMode(relayPin, OUTPUT);
-  digitalWrite(relayPin, RELAY_OFF);
+  digitalWrite(relayPin, LOW);  // LOW = OFF at startup
 
-  Serial.begin(115200);
-  delay(1000);
-
-  Serial.println("ESP32-S3 ready");
+  Serial.begin(baudRate);
+  Serial.println("ESP32 relay ready. Send ON or OFF.");
 }
 
 void loop() {
-  if (Serial.available()) {
-    String command = Serial.readStringUntil('\n');
-    command.trim();
+  if (!Serial.available()) {
+    return;
+  }
 
-    if (command == "ON") {
-      digitalWrite(relayPin, RELAY_ON);
-      Serial.println("Relay ON");
-    }
+  String command = Serial.readStringUntil('\n');
+  command.trim();
+  command.toUpperCase();
 
-    else if (command == "OFF") {
-      digitalWrite(relayPin, RELAY_OFF);
-      Serial.println("Relay OFF");
-    }
+  if (command == "ON") {
+    digitalWrite(relayPin, HIGH);
+    Serial.println("Relay ON");
+  } else if (command == "OFF") {
+    digitalWrite(relayPin, LOW);
+    Serial.println("Relay OFF");
+  } else if (command.length() > 0) {
+    Serial.print("Unknown command: ");
+    Serial.println(command);
   }
 }
